@@ -31,7 +31,7 @@ def home():
 @app.route('/signup', methods=['GET', 'POST'])
 def signup():
     if request.method == 'POST':
-        data = request.get_json()  # 클라이언트에서 보내는 JSON 데이터 파싱
+        data = request.get_json()
         username = data.get('username')
         email = data.get('email')
         password = data.get('password')
@@ -76,6 +76,7 @@ def login():
         else:
             return jsonify({'error': 'Invalid credentials!'}), 401
 
+    # GET 요청의 경우, 로그인 페이지 반환
     return render_template('login.html')
 
 @app.route('/logout')
