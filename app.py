@@ -31,14 +31,17 @@ def home():
 @app.route('/signup', methods=['GET', 'POST'])
 def signup():
     if request.method == 'POST':
-        data = request.get_json()
+        data = request.get_json()  # 클라이언트에서 보내는 JSON 데이터 파싱
         username = data.get('username')
         email = data.get('email')
         password = data.get('password')
 
+        # 입력 값 검증
+        if not username or not email or not password:
+            return jsonify({'error': 'Invalid input!'}), 400
+
         # 이메일로 사용자 검색
         existing_user = User.query.filter_by(email=email).first()
-
         if existing_user:
             return jsonify({'error': 'User already exists!'}), 400
 
@@ -52,7 +55,8 @@ def signup():
 
         return jsonify({'message': 'User registered successfully!'}), 201
 
-    return render_template('search.html')
+    # GET 요청의 경우, 회원가입 페이지 반환
+    return render_template('signup.html')
 
 @app.route('/login', methods=['GET', 'POST'])
 def login():

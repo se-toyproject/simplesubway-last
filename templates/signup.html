@@ -52,7 +52,7 @@
 <body>
   <div class="signup-container">
     <h2>회원가입</h2>
-    <form id="signupForm" onsubmit="registerUser(event)">
+    <form id="signupForm" onsubmit="signupUser(event)">
       <label for="username">사용자 이름:</label>
       <input type="text" id="username" name="username" required>
 
@@ -67,13 +67,13 @@
   </div>
 
   <script>
-    async function registerUser(event) {
-      event.preventDefault();
-      const username = document.getElementById('username').value;
-      const email = document.getElementById('email').value;
-      const password = document.getElementById('password').value;
+      async function signupUser(event) {
+    event.preventDefault();
+    const username = document.getElementById('username').value;
+    const email = document.getElementById('email').value;
+    const password = document.getElementById('password').value;
 
-      // 회원가입 폼 데이터를 Flask 서버로 POST 요청을 보냅니다.
+    try {
       const response = await fetch('/signup', {
         method: 'POST',
         headers: {
@@ -83,13 +83,18 @@
       });
 
       const result = await response.json();
+
       if (response.ok) {
         alert(result.message);
-        window.location.href = '/'; // 회원가입 후 메인 페이지로 이동
+        window.location.href = '/login'; // 회원가입 후 로그인 페이지로 이동
       } else {
         alert(result.error);
       }
+    } catch (error) {
+      console.error('회원가입 중 오류 발생:', error);
+      alert('회원가입 중 오류가 발생했습니다.');
     }
+  }
   </script>
 </body>
 </html>
