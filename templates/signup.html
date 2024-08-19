@@ -1,0 +1,95 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8">
+  <title>회원가입</title>
+  <!-- Flask에서 정적 파일(styles.css)을 로드할 때는 url_for을 사용합니다. -->
+  <link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}">
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      background-color: #f8f9fa; /* 연한 회색 배경 */
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      height: 100vh;
+      margin: 0;
+      text-align: center; /* 중앙 정렬 추가 */
+    }
+    .signup-container {
+      background-color: #ffffff;
+      padding: 20px;
+      border-radius: 8px;
+      box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+      text-align: center;
+      border: 2px solid #007bff; /* 파란색 테두리 */
+      width: 300px; /* 크기 줄이기 */
+    }
+    label, input, button {
+      display: block;
+      margin: 10px auto;
+      font-size: 16px;
+    }
+    input {
+      padding: 10px;
+      border: 1px solid #007bff; /* 파란색 테두리 */
+      border-radius: 4px;
+      background-color: #f8f9fa; /* 연한 회색 배경 */
+    }
+    button {
+      padding: 10px 20px;
+      background-color: #007bff; /* 파란색 배경 */
+      color: #ffffff; /* 흰색 텍스트 */
+      border: none;
+      border-radius: 4px;
+      cursor: pointer;
+    }
+    button:hover {
+      background-color: #0056b3; /* 어두운 파란색 배경 */
+    }
+  </style>
+</head>
+<body>
+  <div class="signup-container">
+    <h2>회원가입</h2>
+    <form id="signupForm" onsubmit="registerUser(event)">
+      <label for="username">사용자 이름:</label>
+      <input type="text" id="username" name="username" required>
+
+      <label for="email">이메일:</label>
+      <input type="email" id="email" name="email" required>
+
+      <label for="password">비밀번호:</label>
+      <input type="password" id="password" name="password" required>
+
+      <button type="submit">회원가입</button>
+    </form>
+  </div>
+
+  <script>
+    async function registerUser(event) {
+      event.preventDefault();
+      const username = document.getElementById('username').value;
+      const email = document.getElementById('email').value;
+      const password = document.getElementById('password').value;
+
+      // 회원가입 폼 데이터를 Flask 서버로 POST 요청을 보냅니다.
+      const response = await fetch('/signup', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({ username, email, password })
+      });
+
+      const result = await response.json();
+      if (response.ok) {
+        alert(result.message);
+        window.location.href = '/'; // 회원가입 후 메인 페이지로 이동
+      } else {
+        alert(result.error);
+      }
+    }
+  </script>
+</body>
+</html>

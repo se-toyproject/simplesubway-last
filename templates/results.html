@@ -1,0 +1,156 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8">
+  <title>지하철 도착 정보 결과</title>
+  <!-- Flask에서 정적 파일(styles.css)을 로드할 때는 url_for을 사용합니다. -->
+  <link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}">
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      background-color: #f8f9fa; /* 연한 회색 배경 */
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      height: 100vh;
+      margin: 0;
+      text-align: center; /* 중앙 정렬 추가 */
+    }
+    h1 {
+      color: #007bff; /* 파란색 텍스트 */
+    }
+    h2 {
+      margin-top: 50px; /* 간격을 줄이기 위해 값을 조정 */
+      color: #007bff;
+    }
+
+    .container {
+      background-color: #ffffff;
+      padding: 20px;
+      border-radius: 8px;
+      box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+      text-align: center;
+      border: 2px solid #007bff; /* 파란색 테두리 */
+    }
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      margin-top: 20px;
+    }
+    th, td {
+      padding: 10px;
+      border: 1px solid #007bff; /* 파란색 테두리 */
+      text-align: center; /* 중앙 정렬 추가 */
+    }
+    th {
+      background-color: #007bff; /* 파란색 배경 */
+      color: #ffffff; /* 흰색 텍스트 */
+    }
+    td {
+      background-color: #f8f9fa; /* 연한 회색 배경 */
+    }
+    button {
+      padding: 10px 20px;
+      background-color: #007bff; /* 파란색 배경 */
+      color: #ffffff; /* 흰색 텍스트 */
+      border: none;
+      border-radius: 4px;
+      cursor: pointer;
+      margin-top: 20px;
+    }
+    button:hover {
+      background-color: #0056b3; /* 어두운 파란색 배경 */
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h1 id="stationTitle">지하철 도착 정보 결과</h1>
+    <h2>상행선</h2>
+    <table>
+      <thead>
+        <tr>
+          <th>노선명</th>
+          <th>실시간 도착 정보</th>
+          <th>지하철 현재 위치</th>
+        </tr>
+      </thead>
+      <tbody id="upwardArrivalTableBody">
+        <!-- 상행선 데이터가 여기에 추가됩니다 -->
+      </tbody>
+    </table>
+    <h2>하행선</h2>
+    <table>
+      <thead>
+        <tr>
+          <th>노선명</th>
+          <th>실시간 도착 정보</th>
+          <th>지하철 현재 위치</th>
+        </tr>
+      </thead>
+      <tbody id="downwardArrivalTableBody">
+        <!-- 하행선 데이터가 여기에 추가됩니다 -->
+      </tbody>
+    </table>
+    <button onclick="addToFavorites()">즐겨찾기 추가</button>
+    <button onclick="window.history.back()">돌아가기</button>
+  </div>
+  <script>
+    const urlParams = new URLSearchParams(window.location.search);
+    const stationName = urlParams.get('station');
+    document.getElementById('stationTitle').textContent = `${stationName}역 도착 정보 결과`;
+
+    const apiKey = '735051707268736335374741514976';
+    const apiUrl = `http://swopenAPI.seoul.go.kr/api/subway/${apiKey}/json/realtimeStationArrival/0/5/${stationName}`;
+
+    fetch(apiUrl)
+      .then(response => response.json())
+      .then(data => {
+        displayArrivalInfo(data);
+      })
+      .catch(error => console.error('Error:', error));
+
+    function displayArrivalInfo(data) {
+      const arrivalList = data.realtimeArrivalList;
+      const upwardTableBody = document.getElementById('upwardArrivalTableBody');
+      const downwardTableBody = document.getElementById('downwardArrivalTableBody');
+      upwardTableBody.innerHTML = ''; // 기존 데이터를 초기화
+      downwardTableBody.innerHTML = ''; // 기존 데이터를 초기화
+
+      arrivalList.forEach(arrival => {
+        const trainLine = arrival.trainLineNm.split(' ')[0]; // 첫 번째 단어만 사용
+        const row = document.createElement('tr');
+        row.innerHTML = `
+          <td>${trainLine}</td>
+          <td>${arrival.arvlMsg2}</td>
+          <td>${arrival.arvlMsg3}</td>
+        `;
+
+        if (arrival.updnLine === '상행' || arrival.updnLine === '내선') {
+          upwardTableBody.appendChild(row);
+        } else {
+          downwardTableBody.appendChild(row);
+        }
+      });
+    }
+
+    // 즐겨찾기 목록을 저장할 배열
+    let favorites = JSON.parse(localStorage.getItem('favorites')) || [];
+
+    // 즐겨찾기 추가 함수
+    function addToFavorites() {
+      const stationName = urlParams.get('station');
+
+      if (stationName && !favorites.includes(stationName)) {
+        favorites.push(stationName);
+        localStorage.setItem('favorites', JSON.stringify(favorites));
+        alert(`${stationName}이(가) 즐겨찾기에 추가되었습니다.`);
+      } else if (favorites.includes(stationName)) {
+        alert(`${stationName}은(는) 이미 즐겨찾기에 추가되어 있습니다.`);
+      } else {
+        alert('먼저 출발역을 선택하세요.');
+      }
+    }
+  </script>
+</body>
+</html>
