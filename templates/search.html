@@ -84,7 +84,11 @@
     <button class="map-button" onclick="location.href='http://www.seoulmetro.co.kr/kr/cyberStation.do'">노선도 보기</button> <!-- 노선도 보기 버튼 추가 -->
     ㅡㅡㅡㅡ
     <p></p>
-    <button class="signup-button" onclick="location.href='/signup'">회원가입</button> <!-- 회원가입 버튼 이동 -->
+    {% if logged_in %}
+      <button class="signup-button" onclick="location.href='/logout'">로그아웃</button>
+    {% else %}
+      <button class="signup-button" onclick="location.href='/login'">로그인</button>
+    {% endif %}
   </div>  
   <script>
    const stations = {

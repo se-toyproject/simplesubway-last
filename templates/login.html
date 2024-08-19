@@ -47,6 +47,11 @@
     button:hover {
       background-color: #0056b3; /* 어두운 파란색 배경 */
     }
+    .button-container {
+      display: flex;
+      justify-content: space-between;
+      margin-top: 20px;
+    }
   </style>
 </head>
 <body>
@@ -59,7 +64,10 @@
       <label for="password">비밀번호:</label>
       <input type="password" id="password" name="password" required>
 
-      <button type="submit">로그인</button>
+      <div class="button-container">
+        <button type="submit">로그인</button>
+        <button type="button" onclick="window.location.href='{{ url_for('signup') }}'">회원가입</button>
+      </div>
     </form>
   </div>
 

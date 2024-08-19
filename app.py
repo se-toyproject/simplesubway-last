@@ -52,7 +52,7 @@ def signup():
 
         return jsonify({'message': 'User registered successfully!'}), 201
 
-    return render_template('signup.html')
+    return render_template('search.html')
 
 @app.route('/login', methods=['GET', 'POST'])
 def login():
@@ -83,20 +83,14 @@ def logout():
 
 @app.route('/favorites')
 def favorites():
-    if 'user_id' not in session:
-        return redirect(url_for('login'))
     return render_template('favorites.html')
 
 @app.route('/results')
 def results():
-    if 'user_id' not in session:
-        return redirect(url_for('login'))
     return render_template('results.html')
 
 @app.route('/search')
 def search():
-    if 'user_id' not in session:
-        return redirect(url_for('login'))
     return render_template('search.html')
 
 if __name__ == '__main__':
