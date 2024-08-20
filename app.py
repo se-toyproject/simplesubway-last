@@ -31,29 +31,40 @@ def home():
 @app.route('/signup', methods=['GET', 'POST'])
 def signup():
     if request.method == 'POST':
-        data = request.get_json()
-        username = data.get('username')
-        email = data.get('email')
-        password = data.get('password')
+        try:
+            data = request.get_json()
+            username = data.get('username')
+            email = data.get('email')
+            password = data.get('password')
+        except Exception as e:
+            return jsonify({'error': 'Invalid input data!'}), 400
 
         # 입력 값 검증
         if not username or not email or not password:
-            return jsonify({'error': 'Invalid input!'}), 400
+            return jsonify({'error': 'All fields are required!'}), 400
 
-        # 이메일로 사용자 검색
-        existing_user = User.query.filter_by(email=email).first()
+        # 사용자 이름과 이메일 중복 검사
+        existing_user = User.query.filter((User.email == email) | (User.username == username)).first()
         if existing_user:
-            return jsonify({'error': 'User already exists!'}), 400
+            if existing_user.email == email:
+                return jsonify({'error': 'Email already exists!'}), 400
+            else:
+                return jsonify({'error': 'Username already exists!'}), 400
 
-        # 비밀번호 해시화
-        hashed_password = generate_password_hash(password, method='sha256')
+        try:
+            # 비밀번호 해시화
+            hashed_password = generate_password_hash(password, method='sha256')
 
-        # 새로운 사용자 생성
-        new_user = User(username=username, email=email, password=hashed_password)
-        db.session.add(new_user)
-        db.session.commit()
+            # 새로운 사용자 생성
+            new_user = User(username=username, email=email, password=hashed_password)
+            db.session.add(new_user)
+            db.session.commit()
 
-        return jsonify({'message': 'User registered successfully!'}), 201
+            return jsonify({'message': 'User registered successfully!'}), 201
+        except Exception as e:
+            db.session.rollback()
+            # 오류 메시지를 자세히 출력 (개발 중에만 사용)
+            return jsonify({'error': f'An error occurred: {str(e)}'}), 500
 
     # GET 요청의 경우, 회원가입 페이지 반환
     return render_template('signup.html')

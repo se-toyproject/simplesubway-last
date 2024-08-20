@@ -82,8 +82,11 @@
     <button onclick="viewFavorites()">즐겨 찾기 목록</button>
     <button class="map-button" onclick="location.href='http://www.seoulmetro.co.kr/kr/cyberStation.do'">노선도 보기</button> <!-- 노선도 보기 버튼 추가 -->
     <p></p>
-      <button class="signup-button" onclick="location.href='/logout'">로그아웃</button>
-      <button class="signup-button" onclick="location.href='/login'">로그인</button>
+    {% if session.logged_in %}
+    <button class="signup-button" onclick="location.href='/logout'">로그아웃</button>
+  {% else %}
+    <button class="signup-button" onclick="location.href='/login'">로그인</button>
+  {% endif %}
   </div>  
   <script>
    const stations = {
