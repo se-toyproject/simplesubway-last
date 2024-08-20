@@ -52,8 +52,8 @@ def signup():
                 return jsonify({'error': 'Username already exists!'}), 400
 
         try:
-            # 비밀번호 해시화
-            hashed_password = generate_password_hash(password, method='sha256')
+            # 비밀번호 해시화 (pbkdf2:sha256 사용)
+            hashed_password = generate_password_hash(password, method='pbkdf2:sha256')
 
             # 새로운 사용자 생성
             new_user = User(username=username, email=email, password=hashed_password)
@@ -83,6 +83,7 @@ def login():
             # 로그인 성공, 세션에 사용자 정보 저장
             session['user_id'] = user.id
             session['username'] = user.username
+            session['logged_in'] = True  # 로그인 상태를 세션에 저장
             return jsonify({'message': 'Login successful!'}), 200
         else:
             return jsonify({'error': 'Invalid credentials!'}), 401
@@ -95,6 +96,7 @@ def logout():
     # 세션에서 사용자 정보 제거
     session.pop('user_id', None)
     session.pop('username', None)
+    session.pop('logged_in', None)
     return redirect(url_for('login'))
 
 @app.route('/favorites')
