@@ -97,7 +97,7 @@ def logout():
     session.pop('user_id', None)
     session.pop('username', None)
     session.pop('logged_in', None)
-    return redirect(url_for('login'))
+    return redirect(url_for('search'))
 
 @app.route('/favorites')
 def favorites():
