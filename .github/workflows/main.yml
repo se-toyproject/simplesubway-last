@@ -6,8 +6,8 @@ on:
 
 env:
   PROJECT_NAME: sesubway
-  BUCKET_NAME: se-cicd-bucket 
-  CODE_DEPLOY_APP_NAME: sesubway-cicd
+  BUCKET_NAME: subway-cicd-bucket 
+  CODE_DEPLOY_APP_NAME: sesubway_cicd
   CODE_DEPLOY_APP_GROUP_NAME: sesubway_instance
   AWS_REGION: ap-northeast-2
 
@@ -20,7 +20,7 @@ jobs:
       - name: Set up Python
         uses: actions/setup-python@v2
         with:
-          python-version: 3.8
+          python-version: 3.12
 
       - name: Make Zip File
         run: |
