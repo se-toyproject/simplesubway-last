@@ -3,63 +3,99 @@
 <head>
   <meta charset="UTF-8">
   <title>지하철 뚝딱 등교 뚝딱</title>
-  <link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}">
   <style>
     body {
-      font-family: Arial, sans-serif;
-      background-color: #f8f9fa; /* 연한 회색 배경 */
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      background-color: #ffffff; /* Solid white background */
       display: flex;
       justify-content: center;
       align-items: center;
       height: 100vh;
       margin: 0;
-      text-align: center; /* 중앙 정렬 추가 */
-      flex-direction: column; /* 세로 정렬 */
+      flex-direction: column; /* Arrange content vertically */
     }
-    h1 {
-      color: #007bff; /* 파란색 텍스트 */
-    }
+
     .container {
       background-color: #ffffff;
-      padding: 20px;
-      border-radius: 8px;
-      box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+      padding: 20px; /* Adjust padding */
+      border-radius: 12px;
+      box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1); /* Lighter shadow */
+      width: 90%;
+      max-width: 300px;
       text-align: center;
-      border: 2px solid #007bff; /* 파란색 테두리 */
-      margin-bottom: 20px; /* 아래 여백 추가 */
+      border: 1px solid #e2e2e2; /* Light grey border */
+      margin-bottom: 20px; /* Space between container and login button */
     }
-    label, select, button, input {
-      display: block;
-      margin: 10px auto;
-      font-size: 16px;
+
+    h1 {
+      color: #66bb6a; /* Light green text color */
+      font-size: 20px; /* Adjusted font size */
+      margin-bottom: 30px; /* Adjust margin */
     }
+
     select, input {
-      padding: 10px;
-      border: 1px solid #007bff; /* 파란색 테두리 */
-      border-radius: 4px;
-      background-color: #f8f9fa; /* 연한 회색 배경 */
+      width: 100%; /* Full width */
+      padding: 12px;
+      margin: 10px 0;
+      border: 1px solid #66bb6a; /* Green border */
+      border-radius: 8px; /* Rounded corners */
+      background-color: #ffffff;
+      font-size: 16px;
+      color: #66bb6a; /* Light green text color */
     }
+
     button {
-      padding: 10px 20px;
-      background-color: #007bff; /* 파란색 배경 */
-      color: #ffffff; /* 흰색 텍스트 */
+      width: 100%;
+      padding: 14px; /* Increased padding */
+      margin: 10px 0;
       border: none;
-      border-radius: 4px;
+      border-radius: 8px; /* Consistent rounded corners */
+      background-color: #66bb6a; /* Light green background */
+      color: #ffffff;
+      font-size: 16px;
       cursor: pointer;
+      transition: background-color 0.3s;
     }
+
     button:hover {
-      background-color: #0056b3; /* 어두운 파란색 배경 */
+      background-color: #558b2f; /* Darker green on hover */
     }
-    .signup-button {
-      margin-top: 5px; /* 위쪽 여백 추가 */
+
+    .footer-buttons {
+      display: flex;
+      justify-content: space-between;
+      margin-top: 20px;
     }
-    .map-button {
-  margin-top: 5px; /* 위쪽 여백 추가 */
+
+    .footer-buttons button {
+      width: 48%; /* Two buttons sharing the row */
     }
+
+    .login-button {
+      background-color: #66bb6a; /* Light green background */
+      color: #ffffff;
+      border: none;
+      border-radius: 6px;
+      padding: 10px 20px;
+      font-size: 16px;
+      cursor: pointer;
+      width: 90%; /* Match the container width */
+      max-width: 300px;
+      margin-bottom: 20px; /* Additional spacing from the bottom */
+    }
+
+    .additional-info {
+      color: #666666;
+      font-size: 14px;
+      margin-top: 10px;
+    }
+
   </style>
 </head>
 
 <body>
+
+  <!-- 메인 컨텐츠 -->
   <div class="container">
     <h1>지하철 뚝딱, 등교 뚝딱!</h1>
     <select id="lineSelect" onchange="updateStations()">
@@ -77,19 +113,18 @@
     <select id="stationSelect">
       <option value="">출발역을 선택하세요</option>
     </select>
-    <p></p>
     <button onclick="goToResultsPage()">조회 하기</button>
-    <button onclick="viewFavorites()">즐겨 찾기 목록</button>
-    <button class="map-button" onclick="location.href='http://www.seoulmetro.co.kr/kr/cyberStation.do'">노선도 보기</button> <!-- 노선도 보기 버튼 추가 -->
-    <p></p>
-    {% if session.logged_in %}
-    <button class="signup-button" onclick="location.href='/logout'">로그아웃</button>
-  {% else %}
-    <button class="signup-button" onclick="location.href='/login'">로그인</button>
-  {% endif %}
-  </div>  
+    <div class="footer-buttons">
+      <button onclick="viewFavorites()">즐겨 찾기 목록</button>
+      <button class="map-button" onclick="location.href='http://www.seoulmetro.co.kr/kr/cyberStation.do'">노선도 보기</button> <!-- 노선도 보기 버튼 추가 -->
+    </div>
+  </div>
+
+  <!-- 로그인 버튼 하단 -->
+  <button class="login-button">로그인</button>
+
   <script>
-   const stations = {
+    const stations = {
       "1호선": ["연천", "전곡", "청산", "소요산", "동두천", "보산", "동두천중앙", "지행", "봉양", "덕정(서정대)", "회천중앙", "덕계", "양주(경동대)", "녹양", "가능(을지대병원)", "의정부", "회룡", "망월사(신한대 제1캠퍼스)", "도봉산", "도봉", "방학(도봉구청)", "창동", "녹천", "월계(인덕대)", "광운대", "석계", "신이문", "외대앞", "회기", "청량리(서울시립대입구)", "제기동(한국건강관리협회)", "신설동", "동묘앞", "동대문", "종로5가(삼양그룹)", "종로3가", "종각", "시청", "서울역(지하)", "남영", "용산", "노량진", "대방", "신길", "영등포", "신도림", "구로", "구일(동양미래대)", "개봉", "오류동", "온수(성공회대입구)", "역곡(가톨릭대)", "소사(서울신학대)", "부천(부천대)", "중동", "송내", "부개", "부평(가톨릭대 인천성모병원)", "백운", "동암", "간석", "주안", "도화", "제물포(인천대학교 제물포캠퍼스)", "도원", "동인천"],
       "2호선": ["신설동", "용두", "신답", "왕십리", "상왕십리", "신당", "동대문역사문화공원", "을지로4가", "을지로3가", "을지로입구", "시청", "충정로", "아현", "이대", "신촌", "홍대입구", "합정", "당산", "영등포구청", "문래", "신도림", "대림", "구로디지털단지", "신대방", "신림", "봉천", "서울대입구", "낙성대", "사당", "방배", "서초", "교대", "강남", "역삼", "선릉", "삼성", "종합운동장", "잠실새내", "잠실", "잠실나루", "강변", "구의", "건대입구", "신도림", "도림천", "양천구청", "신정네거리", "까치산"],
       "3호선": ["대화", "주엽", "정발산", "마두", "백석", "대곡", "화정", "원당", "원흥", "삼송", "지축", "구파발", "연신내", "불광", "녹번", "홍제", "무악재", "독립문", "경복궁", "안국", "종로3가", "을지로3가", "충무로", "동대입구", "약수", "금호", "옥수", "압구정", "신사", "잠원", "고속터미널", "교대", "남부터미널", "양재", "매봉", "도곡", "대치", "학여울", "대청", "일원", "수서", "가락시장", "경찰병원", "오금"],
@@ -100,7 +135,6 @@
       "8호선": ["별내", "다산", "남양주양정", "별내별가람", "초지", "암사", "천호", "강동구청", "몽촌토성", "잠실", "석촌", "송파", "가락시장", "문정", "장지", "복정", "산성", "남한산성입구", "단대오거리", "신흥", "수진", "모란"],
       "9호선": [ "개화", "김포공항", "공항시장", "신방화", "마곡나루", "양천향교",  "가양", "등촌", "염창", "신목동", "선유도", "당산", "국회의사당",  "여의도", "샛강", "노량진", "노들", "흑석", "동작", "구반포",  "신반포", "고속터미널", "사평", "신논현", "언주", "선정릉",  "삼성중앙", "봉은사", "종합운동장", "삼전", "석촌", "석촌고분",  "송파나루", "한성백제", "올림픽공원", "둔촌오륜", "중앙보훈병원"]
     };
-
 
     function updateStations() {
       const lineSelect = document.getElementById('lineSelect');
