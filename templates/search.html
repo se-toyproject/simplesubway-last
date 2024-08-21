@@ -29,7 +29,7 @@
 
     h1 {
       color: #66bb6a; /* Light green text color */
-      font-size: 20px; /* Adjusted font size */
+      font-size: 28px; /* Adjusted font size */
       margin-bottom: 30px; /* Adjust margin */
     }
 
@@ -71,7 +71,7 @@
       width: 48%; /* Two buttons sharing the row */
     }
 
-    .login-button {
+    .signup-button {
       background-color: #66bb6a; /* Light green background */
       color: #ffffff;
       border: none;
@@ -120,8 +120,12 @@
     </div>
   </div>
 
-  <!-- 로그인 버튼 하단 -->
-  <button class="login-button">로그인</button>
+  <!-- 로그인/로그아웃 버튼 하단 -->
+  {% if session.logged_in %}
+    <button class="signup-button" onclick="location.href='/logout'">로그아웃</button>
+  {% else %}
+    <button class="signup-button" onclick="location.href='/login'">로그인</button>
+  {% endif %}
 
   <script>
     const stations = {
