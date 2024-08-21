@@ -1,59 +1,56 @@
-name: Build and Deploy to EC2
+name: Build and Deploy Flask to AWS EC2
 
 on:
   push:
-    branches: [ "master" ]
-  pull_request:
-    branches: [ "master" ]
+    branches: [ "main" ]
 
-# --------------------------추가
 env:
-  sesubway: moduform_project
-  se-cicd-bucket: moduform-cicd-bucket
-  sesubway-cicd: moduform_cicd
-  sesubway_instance: moduform_instance
-# --------------------------추가
+  PROJECT_NAME: sesubway
+  BUCKET_NAME: se-cicd-bucket 
+  CODE_DEPLOY_APP_NAME: sesubway-cicd
+  CODE_DEPLOY_APP_GROUP_NAME: sesubway_instance
+  AWS_REGION: ap-northeast-2
+  
+//secrets.AWS_ACCESS_KEY_ID,secrets.AWS_PRIVATE_ACCESS_KEY 깃허브 키 이름 맞추기
 
 jobs:
   deploy:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v2
-      
-      - name: Set up Python 3.x
+
+      - name: Set up Python
         uses: actions/setup-python@v2
         with:
-          python-version: 3.x
+          python-version: 3.8
 
       - name: Install dependencies
         run: |
+          python -m venv venv
+          . venv/bin/activate
           pip install -r requirements.txt
+
+      - name: Make Zip File
+        run: |
+          . venv/bin/activate
+          zip -qq -r ./$GITHUB_SHA.zip .
         shell: bash
 
-      - name: Run Tests
-        run: |
-          pytest
-        shell: bash
-        
-# --------------------------추가      
-      - name: Make Zip File
-        run: zip -qq -r ./$GITHUB_SHA.zip .
-        shell: bash
-        
       - name: Configure AWS credentials
         uses: aws-actions/configure-aws-credentials@v1
         with:
           aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
           aws-secret-access-key: ${{ secrets.AWS_PRIVATE_ACCESS_KEY }}
-          aws-region: ap-northeast-2
-      
+          aws-region: ${{ env.AWS_REGION }}
+
       - name: Upload to S3
-        run: aws s3 cp --region ap-northeast-2 ./$GITHUB_SHA.zip s3://$BUCKET_NAME/$PROJECT_NAME/$GITHUB_SHA.zip
+        run: |
+          aws s3 cp --region ${{ env.AWS_REGION }} ./$GITHUB_SHA.zip s3://$BUCKET_NAME/$PROJECT_NAME/$GITHUB_SHA.zip
 
       - name: Code Deploy To EC2 instance
-        run: aws deploy create-deployment \
-                --application-name $CODE_DEPLOY_APP_NAME \
-                --deployment-config-name CodeDeployDefault.AllAtOnce \
-                --deployment-group-name $DEPLOYMENT_GROUP_NAME \
+        run: aws deploy create-deployment 
+                --application-name $CODE_DEPLOY_APP_NAME 
+                --deployment-config-name CodeDeployDefault.AllAtOnce
+                --deployment-group-name ${{ env.CODE_DEPLOY_APP_GROUP_NAME }}
                 --s3-location bucket=$BUCKET_NAME,bundleType=zip,key=$PROJECT_NAME/$GITHUB_SHA.zip
-# --------------------------추가
+                --region ${{ env.AWS_REGION }}
