@@ -10,8 +10,6 @@ env:
   CODE_DEPLOY_APP_NAME: sesubway-cicd
   CODE_DEPLOY_APP_GROUP_NAME: sesubway_instance
   AWS_REGION: ap-northeast-2
-  
-
 
 jobs:
   deploy:
@@ -24,15 +22,8 @@ jobs:
         with:
           python-version: 3.8
 
-      - name: Install dependencies
-        run: |
-          python -m venv venv
-          . venv/bin/activate
-          pip install -r requirements.txt
-
       - name: Make Zip File
         run: |
-          . venv/bin/activate
           zip -qq -r ./$GITHUB_SHA.zip .
         shell: bash
 
