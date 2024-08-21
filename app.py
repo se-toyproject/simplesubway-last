@@ -112,4 +112,4 @@ def search():
     return render_template('search.html')
 
 if __name__ == '__main__':
-    app.run(debug=True)
+    app.run(debug=True, host='0.0.0.0', port=5000)
