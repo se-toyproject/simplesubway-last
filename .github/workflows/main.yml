@@ -6,9 +6,9 @@ on:
 
 env:
   PROJECT_NAME: sesubway
-  BUCKET_NAME: subway-cicd-bucket 
+  BUCKET_NAME: sesubway-cicd-bucket 
   CODE_DEPLOY_APP_NAME: sesubway_cicd
-  CODE_DEPLOY_APP_GROUP_NAME: sesubway_instance
+  CODE_DEPLOY_APP_GROUP_NAME: sesubway-instance
   AWS_REGION: ap-northeast-2
 
 jobs:
