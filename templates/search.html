@@ -95,7 +95,6 @@
 
 <body>
 
-  <!-- 메인 컨텐츠 -->
   <div class="container">
     <h1>지하철 뚝딱, 등교 뚝딱!</h1>
     <select id="lineSelect" onchange="updateStations()">
@@ -115,7 +114,12 @@
     </select>
     <button onclick="goToResultsPage()">조회 하기</button>
     <div class="footer-buttons">
-      <button onclick="viewFavorites()">즐겨 찾기 목록</button>
+      {% if session.logged_in %}
+        <button onclick="viewFavorites()">즐겨 찾기 목록</button>
+      {% else %}
+        <button class="map-button" onclick="location.href='/login'">즐겨 찾기 목록</button>
+
+      {% endif %}
       <button class="map-button" onclick="location.href='http://www.seoulmetro.co.kr/kr/cyberStation.do'">노선도 보기</button> <!-- 노선도 보기 버튼 추가 -->
     </div>
   </div>
@@ -125,6 +129,7 @@
     <button class="signup-button" onclick="location.href='/logout'">로그아웃</button>
   {% else %}
     <button class="signup-button" onclick="location.href='/login'">로그인</button>
+
   {% endif %}
 
   <script>
