@@ -37,19 +37,19 @@ def signup():
             email = data.get('email')
             password = data.get('password')
         except Exception as e:
-            return jsonify({'error': 'Invalid input data!'}), 400
+            return jsonify({'error': '입력이 잘못되었습니다.'}), 400
 
         # 입력 값 검증
         if not username or not email or not password:
-            return jsonify({'error': 'All fields are required!'}), 400
+            return jsonify({'error': '모든 칸에 기입하여주십시오.'}), 400
 
         # 사용자 이름과 이메일 중복 검사
         existing_user = User.query.filter((User.email == email) | (User.username == username)).first()
         if existing_user:
             if existing_user.email == email:
-                return jsonify({'error': 'Email already exists!'}), 400
+                return jsonify({'error': '이미 사용중인 이메일입니다.'}), 400
             else:
-                return jsonify({'error': 'Username already exists!'}), 400
+                return jsonify({'error': '이미 사용중인 아이디입니다.'}), 400
 
         try:
             # 비밀번호 해시화 (pbkdf2:sha256 사용)
@@ -60,7 +60,7 @@ def signup():
             db.session.add(new_user)
             db.session.commit()
 
-            return jsonify({'message': 'User registered successfully!'}), 201
+            return jsonify({'message': '회원가입이 완료되었습니다.'}), 201
         except Exception as e:
             db.session.rollback()
             # 오류 메시지를 자세히 출력 (개발 중에만 사용)
@@ -84,9 +84,9 @@ def login():
             session['user_id'] = user.id
             session['username'] = user.username
             session['logged_in'] = True  # 로그인 상태를 세션에 저장
-            return jsonify({'message': 'Login successful!'}), 200
+            return jsonify({'message': '로그인이 되었습니다.'}), 200
         else:
-            return jsonify({'error': 'Invalid credentials!'}), 401
+            return jsonify({'error': '로그인에 실패하였습니다.'}), 401
 
     # GET 요청의 경우, 로그인 페이지 반환
     return render_template('login.html')
