@@ -112,13 +112,17 @@
     <select id="stationSelect">
       <option value="">출발역을 선택하세요</option>
     </select>
+      {% if session.logged_in %}
     <button onclick="goToResultsPage()">조회 하기</button>
+      {% else %}
+    <button class="map-button" onclick="location.href='/login'">조회하기</button>
+      {% endif %}
     <div class="footer-buttons">
       {% if session.logged_in %}
         <button onclick="viewFavorites()">즐겨 찾기 목록</button>
       {% else %}
-        <button class="map-button" onclick="location.href='/login'">즐겨 찾기 목록</button>
-              {% endif %}
+        <button class="map-button" onclick="location.href='/login'">즐겨 찾기 목록</button>            
+      {% endif %}
       <button class="map-button" onclick="location.href='http://www.seoulmetro.co.kr/kr/cyberStation.do'">노선도 보기</button> <!-- 노선도 보기 버튼 추가 -->
     </div>
   </div>

@@ -41,7 +41,7 @@ def signup():
 
         # 입력 값 검증
         if not username or not email or not password:
-            return jsonify({'error': '모든 칸에 기입하여주십시오.'}), 400
+            return jsonify({'error': '모든 칸에 기입하여 주십시오.'}), 400
 
         # 사용자 이름과 이메일 중복 검사
         existing_user = User.query.filter((User.email == email) | (User.username == username)).first()
