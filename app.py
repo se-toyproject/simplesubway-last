@@ -1,28 +1,40 @@
-from flask import Flask, render_template, request, redirect, url_for, jsonify, session
+from flask import Flask, render_template, request, redirect, url_for, session, jsonify
 from flask_sqlalchemy import SQLAlchemy
 from werkzeug.security import generate_password_hash, check_password_hash
+from functools import wraps
+from flask_cors import CORS
 
 app = Flask(__name__)
+CORS(app)
 
-# 세션을 위한 비밀 키 설정
 app.config['SECRET_KEY'] = 'your_secret_key_here'
-
-# SQLite 데이터베이스 설정
 app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///users.db'
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 
 db = SQLAlchemy(app)
 
-# 사용자 모델 정의
 class User(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     username = db.Column(db.String(100), unique=True, nullable=False)
     email = db.Column(db.String(100), unique=True, nullable=False)
     password = db.Column(db.String(100), nullable=False)
+    favorites = db.relationship('Favorite', backref='user', lazy=True)
 
-# 데이터베이스 초기화
+class Favorite(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    station = db.Column(db.String(100), nullable=False)
+    user_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False)
+
 with app.app_context():
     db.create_all()
+
+def login_required(f):
+    @wraps(f)
+    def decorated_function(*args, **kwargs):
+        if 'logged_in' not in session or not session['logged_in']:
+            return jsonify({"error": "로그인이 필요합니다."}), 401
+        return f(*args, **kwargs)
+    return decorated_function
 
 @app.route('/')
 def home():
@@ -31,77 +43,92 @@ def home():
 @app.route('/signup', methods=['GET', 'POST'])
 def signup():
     if request.method == 'POST':
-        try:
-            data = request.get_json()
-            username = data.get('username')
-            email = data.get('email')
-            password = data.get('password')
-        except Exception as e:
-            return jsonify({'error': '입력이 잘못되었습니다.'}), 400
+        username = request.form.get('username')
+        email = request.form.get('email')
+        password = request.form.get('password')
 
-        # 입력 값 검증
+        print(f"Received signup data: username={username}, email={email}, password={password}")  # 디버깅용
+
         if not username or not email or not password:
-            return jsonify({'error': '모든 칸에 기입하여 주십시오.'}), 400
+            return jsonify({"error": "모든 칸에 기입하여 주십시오."}), 400
 
-        # 사용자 이름과 이메일 중복 검사
         existing_user = User.query.filter((User.email == email) | (User.username == username)).first()
         if existing_user:
-            if existing_user.email == email:
-                return jsonify({'error': '이미 사용중인 이메일입니다.'}), 400
-            else:
-                return jsonify({'error': '이미 사용중인 아이디입니다.'}), 400
+            message = "이미 사용중인 이메일입니다." if existing_user.email == email else "이미 사용중인 아이디입니다."
+            return jsonify({"error": message}), 400
 
-        try:
-            # 비밀번호 해시화 (pbkdf2:sha256 사용)
-            hashed_password = generate_password_hash(password, method='pbkdf2:sha256')
+        hashed_password = generate_password_hash(password, method='pbkdf2:sha256')
+        new_user = User(username=username, email=email, password=hashed_password)
+        db.session.add(new_user)
+        db.session.commit()
 
-            # 새로운 사용자 생성
-            new_user = User(username=username, email=email, password=hashed_password)
-            db.session.add(new_user)
-            db.session.commit()
+        return jsonify({"message": "회원가입이 완료되었습니다."}), 201
 
-            return jsonify({'message': '회원가입이 완료되었습니다.'}), 201
-        except Exception as e:
-            db.session.rollback()
-            # 오류 메시지를 자세히 출력 (개발 중에만 사용)
-            return jsonify({'error': f'An error occurred: {str(e)}'}), 500
-
-    # GET 요청의 경우, 회원가입 페이지 반환
     return render_template('signup.html')
 
 @app.route('/login', methods=['GET', 'POST'])
 def login():
     if request.method == 'POST':
-        data = request.get_json()
-        username = data.get('username')
-        password = data.get('password')
+        username = request.form.get('username')
+        password = request.form.get('password')
+        
+        print(f"Received login attempt with username: {username} and password: {password}")  # 디버깅용
 
-        # 사용자 이름으로 사용자 검색
         user = User.query.filter_by(username=username).first()
-
         if user and check_password_hash(user.password, password):
-            # 로그인 성공, 세션에 사용자 정보 저장
             session['user_id'] = user.id
             session['username'] = user.username
-            session['logged_in'] = True  # 로그인 상태를 세션에 저장
-            return jsonify({'message': '로그인이 되었습니다.'}), 200
+            session['logged_in'] = True
+            return jsonify({"message": "로그인이 되었습니다."}), 200
         else:
-            return jsonify({'error': '로그인에 실패하였습니다.'}), 401
-
-    # GET 요청의 경우, 로그인 페이지 반환
-    return render_template('login.html')
+            return jsonify({"error": "로그인에 실패하였습니다."}), 401
 
 @app.route('/logout')
 def logout():
-    # 세션에서 사용자 정보 제거
     session.pop('user_id', None)
     session.pop('username', None)
     session.pop('logged_in', None)
     return redirect(url_for('search'))
 
-@app.route('/favorites')
-def favorites():
+@app.route('/favorites', methods=['POST'])
+@login_required
+def add_favorite():
+    user_id = session['user_id']
+    station = request.form.get('station')
+
+    if Favorite.query.filter_by(user_id=user_id, station=station).first():
+        return jsonify({"error": "이미 즐겨찾기에 추가된 항목입니다."}), 400
+
+    new_favorite = Favorite(station=station, user_id=user_id)
+    db.session.add(new_favorite)
+    db.session.commit()
+    return jsonify({"message": "즐겨찾기에 추가되었습니다."}), 201
+
+@app.route('/favorites', methods=['GET'])
+@login_required
+def get_favorites():
+    user_id = session['user_id']
+    favorites = Favorite.query.filter_by(user_id=user_id).all()
+    favorite_list = [fav.station for fav in favorites]
+    return jsonify({"favorites": favorite_list}), 200
+
+@app.route('/favorites_page')
+@login_required
+def favorites_page():
     return render_template('favorites.html')
+
+@app.route('/favorites/<string:station>', methods=['DELETE'])
+@login_required
+def remove_favorite(station):
+    user_id = session['user_id']
+    favorite = Favorite.query.filter_by(user_id=user_id, station=station).first()
+
+    if not favorite:
+        return jsonify({"error": "즐겨찾기에서 찾을 수 없습니다."}), 404
+
+    db.session.delete(favorite)
+    db.session.commit()
+    return jsonify({"message": "즐겨찾기에서 삭제되었습니다."}), 200
 
 @app.route('/results')
 def results():

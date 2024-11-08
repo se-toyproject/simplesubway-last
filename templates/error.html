@@ -1,0 +1,16 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>오류 발생</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}">
+</head>
+<body>
+    <div class="error-message">
+        <h1>{{ message }}</h1>
+        <p>문제를 해결한 후 다시 시도해 주세요.</p>
+        <a href="{{ url_for('home') }}">홈으로 가기</a>
+    </div>
+</body>
+</html>
