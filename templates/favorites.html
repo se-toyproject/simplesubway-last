@@ -1,97 +1,14 @@
 <!DOCTYPE html>
 <html lang="ko">
 <head>
-  <meta charset="UTF-8">
-  <title>즐겨찾기 목록</title>
-  <style>
-    body {
-      font-family: Arial, sans-serif;
-      background-color: #f1f3f4;
-      display: flex;
-      justify-content: center;
-      align-items: center;
-      height: 100vh;
-      margin: 0;
-      text-align: center;
-    }
-    h1 {
-      color: #66bb6a;
-    }
-    .container {
-      background-color: #ffffff;
-      padding: 20px;
-      border-radius: 8px;
-      box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
-      text-align: center;
-      border: 2px solid #66bb6a;
-      width: 300px;
-    }
-    ul {
-      list-style-type: none;
-      padding: 0;
-    }
-    li {
-      padding: 10px;
-      border-bottom: 1px solid #66bb6a;
-      cursor: pointer;
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-    }
-    li:hover {
-      background-color: #e9ecef;
-    }
-    button {
-      padding: 10px 20px;
-      background-color: #66bb6a;
-      color: #ffffff;
-      border: none;
-      border-radius: 4px;
-      cursor: pointer;
-      margin-top: 20px;
-    }
-  </style>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>즐겨찾기 목록</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}">
 </head>
 <body>
-  <div class="container">
     <h1>즐겨찾기 목록</h1>
-    <ul id="favoritesList"></ul>
-    <button onclick="window.history.back()">돌아가기</button>
-  </div>
-
-  <script>
-    document.addEventListener("DOMContentLoaded", () => {
-      const favoritesList = document.getElementById('favoritesList');
-      
-      // 서버에서 즐겨찾기 목록 가져오기
-      fetch('/favorites')
-        .then(response => response.json())
-        .then(favorites => {
-          favoritesList.innerHTML = ''; // 기존 리스트를 비움
-          favorites.forEach(station => {
-            const listItem = document.createElement('li');
-            listItem.innerHTML = `
-              ${station}
-              <button onclick="removeFromFavorites('${station}')">삭제</button>
-            `;
-            listItem.querySelector('button').onclick = (event) => {
-              event.stopPropagation();
-              removeFromFavorites(station);
-            };
-            favoritesList.appendChild(listItem);
-          });
-        });
-
-      // 즐겨찾기 삭제
-      function removeFromFavorites(station) {
-        fetch(`/favorites/${station}`, { method: 'DELETE' })
-          .then(response => response.json())
-          .then(data => {
-            console.log(data.message);  // 삭제 성공 메시지 확인
-            location.reload();  // 페이지 새로고침으로 목록 업데이트
-          });
-      }
-    });
-  </script>
+    <a href="{{ url_for('search') }}" class="button">돌아가기</a>
+    <script src="{{ url_for('static', filename='favorites.js') }}"></script>
 </body>
 </html>
