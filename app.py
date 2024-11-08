@@ -50,7 +50,7 @@ def signup():
         print(f"Received signup data: username={username}, email={email}, password={password}")  # 디버깅용
 
         if not username or not email or not password:
-            return jsonify({"error": "모든 칸에 기입하여 주십시오."}), 400
+            return jsonify({'error': '모든 칸에 기입하여주십시오.'}), 400
 
         existing_user = User.query.filter((User.email == email) | (User.username == username)).first()
         if existing_user:
