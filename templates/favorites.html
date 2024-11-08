@@ -1,9 +1,9 @@
 <!DOCTYPE html>
 <html lang="ko">
 <head>
-  <meta charset="UTF-8">
-  <title>즐겨찾기 목록</title>
-  <link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}">
+    <meta charset="UTF-8">
+    <title>즐겨찾기 목록</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}">
   <style>
     body {
       font-family: Arial, sans-serif;
@@ -69,40 +69,34 @@
   </style>
 </head>
 <body>
-  <div class="container">
-    <h1>즐겨찾기 목록</h1>
-    <ul id="favoritesList">
-    </ul>
-    <button onclick="window.history.back()">돌아가기</button>
-  </div>
+  <h1>즐겨찾기 목록</h1>
+  <ul id="favoritesList"></ul>
+  <button onclick="window.location.href='{{ url_for('search') }}'">돌아가기</button>
+
   <script>
-    const favorites = JSON.parse(localStorage.getItem('favorites')) || [];
-    const favoritesList = document.getElementById('favoritesList');
-
-    favorites.forEach(station => {
-      const listItem = document.createElement('li');
-      listItem.innerHTML = `
-        ${station}
-        <button onclick="removeFromFavorites('${station}')">삭제</button>
-      `;
-      listItem.querySelector('button').onclick = (event) => {
-        event.stopPropagation();
-        removeFromFavorites(station);
-      };
-      listItem.onclick = () => {
-        window.location.href = "{{ url_for('results') }}?station=" + encodeURIComponent(station);
-      };
-      favoritesList.appendChild(listItem);
-    });
-
-    function removeFromFavorites(station) {
-      const index = favorites.indexOf(station);
-      if (index > -1) {
-        favorites.splice(index, 1);
-        localStorage.setItem('favorites', JSON.stringify(favorites));
-        location.reload();
+      function loadFavorites() {
+          fetch('/favorites')
+              .then(response => response.json())
+              .then(data => {
+                  const favoritesList = document.getElementById('favoritesList');
+                  favoritesList.innerHTML = '';
+                  if (Array.isArray(data) && data.length > 0) {
+                      data.forEach(favorite => {
+                          const li = document.createElement('li');
+                          li.textContent = favorite;
+                          favoritesList.appendChild(li);
+                      });
+                  } else {
+                      favoritesList.innerHTML = '<li>즐겨찾기가 없습니다.</li>';
+                  }
+              })
+              .catch(error => {
+                  console.error('Error:', error);
+                  document.getElementById('favoritesList').innerHTML = '<li>즐겨찾기를 불러오는 중 오류가 발생했습니다.</li>';
+              });
       }
-    }
+
+      loadFavorites();
   </script>
 </body>
 </html>

@@ -1,22 +1,22 @@
 from flask import Flask, render_template, request, redirect, url_for, jsonify, session
 from flask_sqlalchemy import SQLAlchemy
+from flask_migrate import Migrate
 from werkzeug.security import generate_password_hash, check_password_hash
 
 app = Flask(__name__)
-
 app.config['SECRET_KEY'] = 'your_secret_key_here'
-
 app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///users.db'
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 
 db = SQLAlchemy(app)
+migrate = Migrate(app, db) 
 
 class User(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     username = db.Column(db.String(100), unique=True, nullable=False)
     email = db.Column(db.String(100), unique=True, nullable=False)
     password = db.Column(db.String(100), nullable=False)
-    favorites = db.Column(db.JSON, default=[])
+    favorites = db.Column(db.JSON, default=lambda: [])
 
 with app.app_context():
     db.create_all()
@@ -87,19 +87,21 @@ def logout():
 def favorites():
     if 'user_id' not in session:
         return jsonify({'error': '로그인이 필요합니다.'}), 401
-    
+
     user = User.query.get(session['user_id'])
-    
+    if not user:
+        return jsonify({'error': '사용자를 찾을 수 없습니다.'}), 404
+
     if request.method == 'GET':
-        return jsonify(user.favorites)
-    
+        return jsonify(user.favorites or [])
+
     elif request.method == 'POST':
         new_favorite = request.json.get('favorite')
-        if new_favorite not in user.favorites:
+        if new_favorite and new_favorite not in user.favorites:
             user.favorites.append(new_favorite)
             db.session.commit()
         return jsonify(user.favorites)
-    
+
     elif request.method == 'DELETE':
         favorite_to_remove = request.json.get('favorite')
         if favorite_to_remove in user.favorites:
